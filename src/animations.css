@@ -1,0 +1,466 @@
+/* Star and Meteor Styles */
+@layer components {
+  .star {
+    @apply absolute rounded-full bg-white;
+    position: absolute; /* fallback if @apply isn't processed */
+    pointer-events: none;
+    z-index: 0;
+    box-shadow: 0 0 14px 4px rgba(255,255,255,0.6), 0 0 40px 8px rgba(66,153,225,0.08);
+    mix-blend-mode: screen;
+    transform: translateZ(0);
+    will-change: opacity, transform;
+  }
+
+  .meteor {
+    @apply absolute rounded-full;
+    position: absolute; /* fallback if @apply isn't processed */
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.9) 30%, rgba(255,255,255,0.6) 60%, rgba(255,255,255,0) 100%);
+    box-shadow: 0 0 18px 6px rgba(255,255,255,0.6);
+    filter: blur(0.6px);
+    transform-origin: left center;
+    mix-blend-mode: screen;
+  }
+}
+
+/* Cosmic Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes meteor {
+  0% { 
+    transform: rotate(215deg) translateX(0);
+    opacity: 1; 
+  }
+  70% { 
+    opacity: 1; 
+  }
+  100% { 
+    transform: rotate(215deg) translateX(-500px);
+    opacity: 0; 
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 4s ease-in-out infinite;
+}
+
+.animate-meteor {
+  animation: meteor 5s linear infinite;
+}
+
+/* Cloud and Bird Animations */
+@keyframes cloud-drift {
+  0% { 
+    transform: translateX(-20px); 
+  }
+  100% { 
+    transform: translateX(calc(100vw + 20px)); 
+  }
+}
+
+@keyframes wing-flap {
+  0%, 100% { 
+    transform: rotateZ(0deg);
+  }
+  50% { 
+    transform: rotateZ(-20deg);
+  }
+}
+
+@keyframes sun-glow {
+  0%, 100% { 
+    filter: drop-shadow(0 0 20px rgba(255, 223, 0, 0.6));
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% { 
+    filter: drop-shadow(0 0 30px rgba(255, 223, 0, 0.8));
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+.animate-cloud-drift {
+  animation: cloud-drift linear infinite;
+}
+
+.animate-sun-glow {
+  animation: sun-glow 4s ease-in-out infinite;
+}
+
+@keyframes bird-fly-right {
+  0% { 
+    transform: translateX(-50px) translateY(0px);
+  }
+  25% { 
+    transform: translateX(25vw) translateY(-10px);
+  }
+  50% { 
+    transform: translateX(50vw) translateY(5px);
+  }
+  75% { 
+    transform: translateX(75vw) translateY(-5px);
+  }
+  100% { 
+    transform: translateX(calc(100vw + 50px)) translateY(0px);
+  }
+}
+
+@keyframes bird-fly-left {
+  0% { 
+    transform: translateX(50px) translateY(0px);
+  }
+  25% { 
+    transform: translateX(-25vw) translateY(-10px);
+  }
+  50% { 
+    transform: translateX(-50vw) translateY(5px);
+  }
+  75% { 
+    transform: translateX(-75vw) translateY(-5px);
+  }
+  100% { 
+    transform: translateX(calc(-100vw - 50px)) translateY(0px);
+  }
+}
+
+@keyframes wing-flap {
+  0%, 100% { 
+    transform: rotateZ(0deg);
+  }
+  50% { 
+    transform: rotateZ(-20deg);
+  }
+}
+
+/* Cloud Styles */
+@layer components {
+  .cloud {
+    @apply absolute rounded-full;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(248, 250, 252, 0.9) 50%,
+      rgba(255, 255, 255, 0.92) 100%
+    );
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.1),
+      0 8px 40px rgba(0, 0, 0, 0.05),
+      inset 0 2px 10px rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+}
+
+.cloud::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 20px;
+  width: 60%;
+  height: 60%;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(248, 250, 252, 0.8) 100%
+  );
+  border-radius: 50px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+}
+
+.cloud::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: 15px;
+  width: 40%;
+  height: 50%;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(248, 250, 252, 0.75) 100%
+  );
+  border-radius: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* Bird Styles */
+@layer components {
+  .bird {
+    @apply absolute;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+
+  .bird-body {
+    @apply absolute;
+    width: 60%;
+    height: 40%;
+    background: linear-gradient(135deg, #000000 0%, #1f2937 100%);
+    border-radius: 50%;
+    top: 30%;
+    left: 20%;
+    transform-origin: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  }
+
+  .bird-wing-left,
+  .bird-wing-right {
+    @apply absolute;
+    width: 35%;
+    height: 25%;
+    background: linear-gradient(135deg, #1f2937 0%, #000000 100%);
+    border-radius: 50% 10% 50% 10%;
+    top: 25%;
+    animation: wing-flap 0.3s ease-in-out infinite alternate;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.bird-wing-left {
+  left: 10%;
+  transform-origin: right center;
+}
+
+.bird-wing-right {
+  right: 10%;
+  transform-origin: left center;
+  animation-delay: 0.15s;
+}
+
+/* Animation Classes */
+.animate-cloud-drift {
+  animation: cloud-drift linear infinite;
+}
+
+.animate-bird-fly-right {
+  animation: bird-fly-right linear infinite;
+}
+
+.animate-bird-fly-left {
+  animation: bird-fly-left linear infinite;
+}
+
+/* Sky Gradient Background */
+.sky-gradient {
+  background: linear-gradient(
+    to bottom,
+    #87CEEB 0%,
+    #98D8E8 30%,
+    #B8E6F0 60%,
+    #E0F6FF 100%
+  );
+}
+
+/* Sun Styles and Animations */
+@layer components {
+  .sun {
+    @apply absolute;
+    width: 80px;
+    height: 80px;
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 0 20px rgba(255, 223, 0, 0.6));
+  }
+
+  .sun-core {
+    @apply absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      circle,
+      #FFD700 0%,
+      #FFA500 70%,
+      #FF8C00 100%
+    );
+    border-radius: 50%;
+    box-shadow: 
+      0 0 30px rgba(255, 215, 0, 0.8),
+      0 0 60px rgba(255, 215, 0, 0.4),
+      inset 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+}
+
+@keyframes sun-glow {
+  0%, 100% { 
+    filter: drop-shadow(0 0 20px rgba(255, 223, 0, 0.6));
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% { 
+    filter: drop-shadow(0 0 30px rgba(255, 223, 0, 0.8));
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+.animate-sun-glow {
+  animation: sun-glow 4s ease-in-out infinite;
+}
+
+/* Mountain Styles */
+@layer components {
+  .mountain-layer {
+    @apply absolute bottom-0 w-full;
+    height: 40%;
+    pointer-events: none;
+  }
+
+  .mountain-back {
+    z-index: 1;
+    opacity: 0.6;
+  }
+
+  .mountain-front {
+    z-index: 2;
+    opacity: 0.8;
+  }
+
+  .mountain {
+    @apply absolute bottom-0;
+    background: linear-gradient(135deg, 
+      rgba(107, 114, 128, 0.8) 0%,
+      rgba(75, 85, 99, 0.9) 50%,
+      rgba(55, 65, 81, 1) 100%
+    );
+    border-radius: 0;
+    filter: blur(0.5px);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.mountain-1 {
+  left: -10%;
+  width: 35%;
+  height: 70%;
+  clip-path: polygon(0% 100%, 20% 30%, 40% 45%, 60% 20%, 100% 100%);
+  background: linear-gradient(135deg, 
+    rgba(156, 163, 175, 0.7) 0%,
+    rgba(107, 114, 128, 0.8) 50%,
+    rgba(75, 85, 99, 0.9) 100%
+  );
+}
+
+.mountain-2 {
+  left: 25%;
+  width: 40%;
+  height: 85%;
+  clip-path: polygon(0% 100%, 15% 40%, 35% 15%, 55% 35%, 75% 25%, 100% 100%);
+  background: linear-gradient(135deg, 
+    rgba(156, 163, 175, 0.6) 0%,
+    rgba(107, 114, 128, 0.7) 50%,
+    rgba(75, 85, 99, 0.8) 100%
+  );
+}
+
+.mountain-3 {
+  right: -10%;
+  width: 45%;
+  height: 60%;
+  clip-path: polygon(0% 100%, 25% 35%, 50% 40%, 75% 20%, 100% 100%);
+  background: linear-gradient(135deg, 
+    rgba(156, 163, 175, 0.7) 0%,
+    rgba(107, 114, 128, 0.8) 50%,
+    rgba(75, 85, 99, 0.9) 100%
+  );
+}
+
+.mountain-4 {
+  left: 10%;
+  width: 30%;
+  height: 50%;
+  clip-path: polygon(0% 100%, 30% 45%, 60% 30%, 100% 100%);
+  background: linear-gradient(135deg, 
+    rgba(75, 85, 99, 0.9) 0%,
+    rgba(55, 65, 81, 1) 50%,
+    rgba(31, 41, 55, 1) 100%
+  );
+  filter: blur(0.2px);
+}
+
+.mountain-5 {
+  right: 15%;
+  width: 35%;
+  height: 45%;
+  clip-path: polygon(0% 100%, 25% 50%, 55% 35%, 80% 55%, 100% 100%);
+  background: linear-gradient(135deg, 
+    rgba(75, 85, 99, 0.9) 0%,
+    rgba(55, 65, 81, 1) 50%,
+    rgba(31, 41, 55, 1) 100%
+  );
+  filter: blur(0.2px);
+}
+
+@keyframes mountain-sway {
+  0%, 100% { 
+    transform: translateX(0px);
+  }
+  50% { 
+    transform: translateX(2px);
+  }
+}
+
+.mountain-back .mountain {
+  animation: mountain-sway 20s ease-in-out infinite;
+}
+
+.mountain-front .mountain {
+  animation: mountain-sway 15s ease-in-out infinite reverse;
+}
+
+/* Theme variables and utility animations (user-provided block) */
+@layer base {
+  :root{
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
+    --card : 0 0% 100%;
+
+    --primary: 250 47% 60%;
+    --primary-foreground: 210 40% 98%;
+
+    --border : 214 32% 91%;
+  }
+
+  .dark{
+    --background: 222 47% 4%;
+    --foreground: 213 31% 91%;
+    --card: 222  47% 8%;
+    --primary: 250 65% 65%;
+    --primary-foreground: 213 31% 91%;
+    --border: 217 33% 20%;
+  }
+
+  /* provide a fully dark backdrop for the star background (no whitish glow) */
+  .starry-backdrop {
+    /* very dark night sky — keep subtle depth but remove any pale center */
+    background: radial-gradient(circle at 50% 40%, rgba(6,8,12,1) 0%, rgba(3,5,8,1) 40%, rgba(0,0,0,1) 100%);
+    background-color: #05070a; /* fallback solid dark color */
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+
+  /* translucent search card so dynamic background shows through */
+  .search-card {
+    /* light fallback for non-dark users */
+    background-color: rgba(255,255,255,0.85);
+    color: rgba(0,0,0,0.88);
+    border: 1px solid rgba(15,23,42,0.06);
+    backdrop-filter: blur(6px) saturate(120%);
+    -webkit-backdrop-filter: blur(6px) saturate(120%);
+    transition: background-color 240ms ease, border-color 240ms ease;
+  }
+
+  /* dark theme variant (stronger translucency for night) */
+  .dark .search-card {
+    background-color: rgba(8,10,14,0.55); /* translucent dark */
+    color: rgba(255,255,255,0.95);
+    border: 1px solid rgba(255,255,255,0.04);
+    /* opacity: 0.05; */
+  }
+}
+
