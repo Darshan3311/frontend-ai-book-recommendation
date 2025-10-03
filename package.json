@@ -5,8 +5,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "render-build": "npm install && npm run build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
+  },
+  "engines": {
+    "node": ">=22.16.0"
   },
   "dependencies": {
     "react": "^18.2.0",
