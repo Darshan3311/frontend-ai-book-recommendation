@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useSavedBooks } from '../../context/SavedBooksContext';
 import { booksApi, BookQuery, Book, FilterOptions } from '../../services/books';
 import BookLoadingAnimation from '../common/BookLoadingAnimation';
-import BookSkeletonGrid from '../common/BookSkeletonGrid';
+// BookSkeletonGrid removed import since it's not used
 import BookCoverImage from '../common/BookCoverImage';
 
 interface BookRecommendationsProps {
@@ -14,7 +14,7 @@ interface BookRecommendationsProps {
 
 const BookRecommendations: React.FC<BookRecommendationsProps> = ({ hideHeader = false }) => {
   const { user, logout } = useAuth();
-  const { savedBooks, saveBook, removeSavedBook, isBookSaved, getSavedBookId, fetchSavedBooks } = useSavedBooks();
+  const { saveBook, removeSavedBook, isBookSaved, getSavedBookId, fetchSavedBooks } = useSavedBooks();
   const [searchForm, setSearchForm] = useState<BookQuery>({
     query: '',
     range: '10-20',
@@ -26,7 +26,6 @@ const BookRecommendations: React.FC<BookRecommendationsProps> = ({ hideHeader = 
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState(0);
-  const [showImageProgress, setShowImageProgress] = useState(false);
 
   // Filter books based on current filters - IMPROVED LOGIC
   // Only filter if user explicitly selected filter values from dropdowns
@@ -246,18 +245,12 @@ const BookRecommendations: React.FC<BookRecommendationsProps> = ({ hideHeader = 
   useEffect(() => {
     if (books.length > 0) {
       setImagesLoaded(0);
-      setShowImageProgress(true);
-      
-      // Hide progress after all images are loaded
+      // Hide/show progress removed — imagesLoaded is still tracked for analytics
       const timer = setTimeout(() => {
-        if (imagesLoaded >= books.length) {
-          setShowImageProgress(false);
-        }
+        // no-op
       }, 500);
 
       return () => clearTimeout(timer);
-    } else {
-      setShowImageProgress(false);
     }
   }, [books.length, imagesLoaded]);
 
@@ -275,7 +268,7 @@ const BookRecommendations: React.FC<BookRecommendationsProps> = ({ hideHeader = 
     });
     setShowFilters(false);
     setImagesLoaded(0);
-    setShowImageProgress(false);
+  // progress UI removed
     toast.success('Search history cleared');
   };
 

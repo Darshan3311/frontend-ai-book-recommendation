@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Search, Heart, Trash2, Calendar, Star, BookOpen } from 'lucide-react';
 import { useSavedBooks } from '../../context/SavedBooksContext';
 import BookCoverImage from '../common/BookCoverImage';
-import toast from 'react-hot-toast';
 
 const SavedBooks: React.FC = () => {
   const { savedBooks, removeSavedBook, isLoading, fetchSavedBooks } = useSavedBooks();
