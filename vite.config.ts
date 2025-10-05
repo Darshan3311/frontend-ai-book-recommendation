@@ -15,14 +15,15 @@ export default defineConfig({
     }
   },
   preview: {
-    host: true,
+    host: '0.0.0.0',
     port: process.env.PORT ? parseInt(process.env.PORT) : 4173,
     strictPort: true,
-    cors: true,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-    }
+    allowedHosts: [
+      'localhost',
+      '127.0.0.1',
+      '0.0.0.0',
+      'frontend-ai-book-recommendation-3.onrender.com',
+      '.onrender.com'
+    ]
   }
 })
