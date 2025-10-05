@@ -22,6 +22,8 @@ export interface Book {
   publisher?: string;
   rating?: number;
   language?: string;
+  // Official purchase/access links
+  book_links?: Array<{ source: string; url: string }>;
   target_audience?: string;
   book_type?: string;
   content_type?: string;
@@ -35,6 +37,8 @@ export interface Book {
   isbn?: string;
   page_count?: number;
   series_info?: string;
+  // Deprecated field (kept for backward compatibility)
+  pdf_url?: string;
 }
 
 export interface FilterOption {
@@ -105,18 +109,48 @@ export const booksApi = {
     }
     
     // Handle both response formats (direct array or wrapped in recommendations)
-    const books = Array.isArray(response.data) 
-      ? response.data 
+    const books = Array.isArray(response.data)
+      ? response.data
       : (response.data.recommendations || []);
-    
-    console.log('✅ Final books array being returned:', books);
-    console.log('📊 Total books count:', books.length);
-    
-    if (books.length > 0) {
-      console.log('📚 Sample book structure:', books[0]);
+
+    // Normalize downloadable PDF URL into `pdf_url` so UI can show the Download button
+    const extractPdfUrl = (item: any): string | undefined => {
+      if (!item) return undefined;
+      const keys = ['pdf_url', 'download_url', 'pdf_link', 'file_url', 'resource_url', 'url', 'link', 'download_link'];
+      for (const k of keys) {
+        if (item[k]) return item[k];
+      }
+      // check common nested places
+      if (item.metadata && typeof item.metadata === 'object') {
+        for (const k of keys) if (item.metadata[k]) return item.metadata[k];
+      }
+      if (item.ai && typeof item.ai === 'object') {
+        for (const k of keys) if (item.ai[k]) return item.ai[k];
+      }
+      if (item.links && Array.isArray(item.links)) {
+        // find first PDF-like link
+        const pdf = item.links.find((l: any) => typeof l === 'string' ? l.endsWith('.pdf') : (l.href && l.href.endsWith && l.href.endsWith('.pdf')));
+        if (pdf) return typeof pdf === 'string' ? pdf : pdf.href;
+      }
+      return undefined;
+    };
+
+    const normalized = (books || []).map((b: any) => {
+      const pdf = extractPdfUrl(b) || extractPdfUrl(b?.book) || extractPdfUrl(b?.data);
+      return {
+        ...b,
+        pdf_url: b.pdf_url || pdf,
+      };
+    });
+
+    console.log('✅ Final books array being returned (normalized):', normalized);
+    console.log('📊 Total books count:', normalized.length);
+
+    if (normalized.length > 0) {
+      console.log('📚 Sample book structure:', normalized[0]);
     }
-    
-    return books;
+
+    return normalized;
   },
 
   getFilters: async (): Promise<FilterOptions> => {

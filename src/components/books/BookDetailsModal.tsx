@@ -1,6 +1,6 @@
 import React from 'react';
 import { Book } from '../../services/books';
-import { X, BookOpen, Calendar, Star, Languages, Users, FileText, BookMarked, GraduationCap } from 'lucide-react';
+import { X, BookOpen, Calendar, Star, Languages, Users, FileText, BookMarked, GraduationCap, ExternalLink, ShoppingCart, BookCopy } from 'lucide-react';
 
 interface BookDetailsModalProps {
   book: Book;
@@ -23,6 +23,20 @@ const BookDetailsModal: React.FC<BookDetailsModalProps> = ({ book, isOpen, onClo
     if (onSave) {
       onSave(book);
     }
+  };
+
+  const handleOpenBookLink = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  // Get icon for book source
+  const getSourceIcon = (source: string) => {
+    const sourceLower = source.toLowerCase();
+    if (sourceLower.includes('amazon')) return <ShoppingCart className="w-4 h-4" />;
+    if (sourceLower.includes('google')) return <BookOpen className="w-4 h-4" />;
+    if (sourceLower.includes('goodreads')) return <Star className="w-4 h-4" />;
+    if (sourceLower.includes('archive')) return <BookCopy className="w-4 h-4" />;
+    return <ExternalLink className="w-4 h-4" />;
   };
 
   return (
@@ -119,20 +133,53 @@ const BookDetailsModal: React.FC<BookDetailsModalProps> = ({ book, isOpen, onClo
                 )}
               </div>
 
-              {/* Action Button */}
-              {onSave && (
-                <button
-                  onClick={handleSaveClick}
-                  disabled={isSaved}
-                  className={`w-full md:w-auto px-6 py-3 rounded-lg font-semibold transition-all ${
-                    isSaved
-                      ? 'bg-green-500 text-white cursor-not-allowed'
-                      : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 hover:shadow-lg'
-                  }`}
-                >
-                  {isSaved ? '✓ Saved to Library' : 'Save to Library'}
-                </button>
+              {/* Book Links - Where to Find/Purchase */}
+              {book.book_links && book.book_links.length > 0 && (
+                <div className="mb-4">
+                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    📚 Find this Book:
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {book.book_links.map((link, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleOpenBookLink(link.url)}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 border-2 border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-300 rounded-lg font-semibold hover:bg-blue-50 dark:hover:bg-slate-600 transition-all"
+                        title={`Find on ${link.source}`}
+                      >
+                        {getSourceIcon(link.source)}
+                        <span>{link.source}</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
+
+              {!book.book_links || book.book_links.length === 0 ? (
+                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    � Search for this book on Amazon, Google Books, or your local library.
+                  </p>
+                </div>
+              ) : null}
+
+              {/* Action Buttons */}
+              <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
+                {onSave && (
+                  <button
+                    onClick={handleSaveClick}
+                    disabled={isSaved}
+                    className={`w-full md:w-auto px-6 py-3 rounded-lg font-semibold transition-all ${
+                      isSaved
+                        ? 'bg-green-500 text-white cursor-not-allowed'
+                        : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 hover:shadow-lg'
+                    }`}
+                  >
+                    {isSaved ? '✓ Saved to Library' : 'Save to Library'}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
