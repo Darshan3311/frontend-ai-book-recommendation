@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, BookOpen, User, LogOut, Loader2, Star, Calendar, X, Heart } from 'lucide-react';
+import { Search, Filter, BookOpen, User, LogOut, Loader2, Star, Calendar, X, Heart, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { useSavedBooks } from '../../context/SavedBooksContext';
@@ -7,6 +7,7 @@ import { booksApi, BookQuery, Book, FilterOptions } from '../../services/books';
 import BookLoadingAnimation from '../common/BookLoadingAnimation';
 // BookSkeletonGrid removed import since it's not used
 import BookCoverImage from '../common/BookCoverImage';
+import BookDetailsModal from './BookDetailsModal';
 
 interface BookRecommendationsProps {
   hideHeader?: boolean;
@@ -15,6 +16,7 @@ interface BookRecommendationsProps {
 const BookRecommendations: React.FC<BookRecommendationsProps> = ({ hideHeader = false }) => {
   const { user, logout } = useAuth();
   const { saveBook, removeSavedBook, isBookSaved, getSavedBookId, fetchSavedBooks } = useSavedBooks();
+
   const [searchForm, setSearchForm] = useState<BookQuery>({
     query: '',
     range: '10-20',
@@ -26,6 +28,20 @@ const BookRecommendations: React.FC<BookRecommendationsProps> = ({ hideHeader = 
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState(0);
+
+  // Modal state for book details
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenBookDetails = (book: Book) => {
+    setSelectedBook(book);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedBook(null), 300); // Clear after animation
+  };
 
   // Filter books based on current filters - IMPROVED LOGIC
   // Only filter if user explicitly selected filter values from dropdowns
@@ -42,203 +58,89 @@ const BookRecommendations: React.FC<BookRecommendationsProps> = ({ hideHeader = 
 
     if (!hasFilters) {
       // No filters applied - show all books from backend
-      console.log('✅ No filters applied, showing all', books.length, 'books');
       setFilteredBooks(books);
       return;
     }
-
-    console.log('🔍 Applying client-side filters to', books.length, 'books');
-    console.log('   Active Filters:', {
-      language: searchForm.language || 'none',
-      target_audience: searchForm.target_audience || 'none',
-      book_type: searchForm.book_type || 'none',
-      content_type: searchForm.content_type || 'none',
-      reading_level: searchForm.reading_level || 'none'
-    });
 
     // Helper function for case-insensitive comparison
     const matchesFilter = (bookValue: string | undefined | null, filterValue: string | undefined) => {
       if (!filterValue || filterValue.trim() === '') return true; // No filter = pass
       if (!bookValue) return false; // Book missing field = fail
-      // Case-insensitive, trim whitespace
       return bookValue.toLowerCase().trim() === filterValue.toLowerCase().trim();
     };
 
-    const filtered = books.filter((book, index) => {
-      // Show debug info for first 3 books
-      if (index < 3) {
-        console.log(`📖 Book ${index + 1}: "${book.title}" by ${book.author}`);
-        console.log('   Book metadata:', {
-          language: book.language || 'not set',
-          target_audience: book.target_audience || 'not set',
-          book_type: book.book_type || 'not set',
-          content_type: book.content_type || 'not set',
-          reading_level: book.reading_level || 'not set'
-        });
-      }
-
-      // Apply filters with case-insensitive matching
+    const filtered = books.filter((book) => {
       const passesLanguage = matchesFilter(book.language, searchForm.language);
       const passesAudience = matchesFilter(book.target_audience, searchForm.target_audience);
       const passesBookType = matchesFilter(book.book_type, searchForm.book_type);
       const passesContentType = matchesFilter(book.content_type, searchForm.content_type);
       const passesReadingLevel = matchesFilter(book.reading_level, searchForm.reading_level);
 
-      const passes = passesLanguage && passesAudience && passesBookType && passesContentType && passesReadingLevel;
-
-      if (index < 3) {
-        console.log(`   Filter results: ${passes ? '✅ PASS' : '❌ FAIL'}`, {
-          language: passesLanguage,
-          audience: passesAudience,
-          bookType: passesBookType,
-          contentType: passesContentType,
-          readingLevel: passesReadingLevel
-        });
-      }
-
-      return passes;
+      return passesLanguage && passesAudience && passesBookType && passesContentType && passesReadingLevel;
     });
-
-    console.log(`📊 Filter results: ${filtered.length}/${books.length} books matched`);
-    
-    // Log available values if filtering produced no results
-    if (filtered.length === 0) {
-      console.log('📈 Available filter values in returned books:');
-      const availableValues = {
-        languages: [...new Set(books.map(b => b.language).filter(Boolean))],
-        target_audiences: [...new Set(books.map(b => b.target_audience).filter(Boolean))],
-        book_types: [...new Set(books.map(b => b.book_type).filter(Boolean))],
-        content_types: [...new Set(books.map(b => b.content_type).filter(Boolean))],
-        reading_levels: [...new Set(books.map(b => b.reading_level).filter(Boolean))]
-      };
-      console.table(availableValues);
-    }
 
     setFilteredBooks(filtered);
   }, [books, searchForm.language, searchForm.target_audience, searchForm.book_type, searchForm.content_type, searchForm.reading_level]);
 
-  // Load persisted data on component mount
+  // Load persisted data and filters on mount
   useEffect(() => {
-    const loadPersistedData = () => {
+    const loadPersistedData = async () => {
       try {
-        // Load saved books
         const savedBooks = localStorage.getItem('bookRecommendations');
         if (savedBooks) {
-          const parsedBooks = JSON.parse(savedBooks);
-          if (parsedBooks.length > 0) {
+          const parsedBooks = JSON.parse(savedBooks as string);
+          if (Array.isArray(parsedBooks) && parsedBooks.length > 0) {
             setBooks(parsedBooks);
             setFilteredBooks(parsedBooks);
-            toast.success(`Restored ${parsedBooks.length} book recommendations from previous search`, {
-              duration: 3000,
-              icon: '📚'
-            });
+            toast.success(`Restored ${parsedBooks.length} book recommendations from previous search`, { duration: 3000, icon: '📚' });
           }
         }
 
-        // Load saved search form
         const savedSearchForm = localStorage.getItem('bookSearchForm');
-        if (savedSearchForm) {
-          const parsedSearchForm = JSON.parse(savedSearchForm);
-          setSearchForm(parsedSearchForm);
-        }
+        if (savedSearchForm) setSearchForm(JSON.parse(savedSearchForm as string));
 
-        // Load saved filters state
         const savedShowFilters = localStorage.getItem('showFilters');
-        if (savedShowFilters) {
-          setShowFilters(JSON.parse(savedShowFilters));
-        }
+        if (savedShowFilters) setShowFilters(JSON.parse(savedShowFilters as string));
       } catch (error) {
         console.error('Error loading persisted data:', error);
       }
-    };
 
-    const loadFilters = async () => {
       try {
         const filterData = await booksApi.getFilters();
         setFilters(filterData);
       } catch (error) {
-        console.error('Error loading filters:', error);
-        toast.error('Failed to load filter options - using defaults');
-        // Provide sensible defaults so the filter UI remains usable
-        const defaultFilters: FilterOptions = {
-          languages: [
-            'English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Japanese', 'Chinese'
-          ],
+        console.error('Error loading filters, using defaults', error);
+        setFilters({
+          languages: ['English', 'Spanish', 'French', 'German'],
           target_audiences: [
             { value: 'children', description: 'Ages 4-12' },
             { value: 'young_adult', description: 'Ages 13-18' },
             { value: 'adult', description: 'Adult readers' },
-            { value: 'general', description: 'Suitable for all ages' }
           ],
           book_types: [
             { value: 'fiction', description: 'Fiction' },
-            { value: 'non_fiction', description: 'Non-fiction' },
-            { value: 'biography', description: 'Biography' }
+            { value: 'non_fiction', description: 'Non-fiction' }
           ],
           content_types: [
             { value: 'novel', description: 'Novel' },
-            { value: 'short_stories', description: 'Short stories' },
-            { value: 'poetry', description: 'Poetry' }
+            { value: 'short_stories', description: 'Short stories' }
           ],
           reading_levels: [
             { value: 'beginner', description: 'Beginner' },
-            { value: 'intermediate', description: 'Intermediate' },
-            { value: 'advanced', description: 'Advanced' }
+            { value: 'intermediate', description: 'Intermediate' }
           ]
-        };
-        setFilters(defaultFilters);
+        });
       }
     };
 
+    // Run loader on mount
     loadPersistedData();
-    loadFilters();
-  }, []);
 
-  // Save data to localStorage whenever books or searchForm changes
-  useEffect(() => {
-    if (books.length > 0) {
-      localStorage.setItem('bookRecommendations', JSON.stringify(books));
-    }
-  }, [books]);
+    // Fetch user's saved books into context (ignore failures)
+    fetchSavedBooks?.().catch(() => {});
 
-  useEffect(() => {
-    localStorage.setItem('bookSearchForm', JSON.stringify(searchForm));
-  }, [searchForm]);
-
-  useEffect(() => {
-    localStorage.setItem('showFilters', JSON.stringify(showFilters));
-  }, [showFilters]);
-
-  // Fetch saved books on mount
-  useEffect(() => {
-    if (user) {
-      fetchSavedBooks();
-    }
-  }, [user, fetchSavedBooks]);
-  
-  // Test API connectivity on mount
-  useEffect(() => {
-    const testConnection = async () => {
-      try {
-        console.log('🔌 Testing API connection...');
-        console.log('API Base URL:', import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000');
-        console.log('Auth Token:', localStorage.getItem('authToken') ? 'Present' : 'Missing');
-        console.log('User:', user);
-      } catch (error) {
-        console.error('❌ API connection test failed:', error);
-      }
-    };
-    testConnection();
-  }, [user]);
-
-  // Handle image loading events
-  useEffect(() => {
-    const handleImageLoaded = () => {
-      setImagesLoaded(prev => prev + 1);
-    };
-
-    window.addEventListener('bookImageLoaded', handleImageLoaded);
-    return () => window.removeEventListener('bookImageLoaded', handleImageLoaded);
+    // no cleanup required here
+    return () => {};
   }, []);
 
   // Reset image loading progress when new results are loaded
@@ -253,6 +155,17 @@ const BookRecommendations: React.FC<BookRecommendationsProps> = ({ hideHeader = 
       return () => clearTimeout(timer);
     }
   }, [books.length, imagesLoaded]);
+
+  // Persist search form, results, and UI state so switching tabs doesn't clear user searches
+  useEffect(() => {
+    try {
+      localStorage.setItem('bookRecommendations', JSON.stringify(books));
+      localStorage.setItem('bookSearchForm', JSON.stringify(searchForm));
+      localStorage.setItem('showFilters', JSON.stringify(showFilters));
+    } catch (e) {
+      console.warn('Failed to persist search state', e);
+    }
+  }, [books, searchForm, showFilters]);
 
   // Clear persisted data function
   const clearPersistedData = () => {
@@ -688,6 +601,17 @@ const BookRecommendations: React.FC<BookRecommendationsProps> = ({ hideHeader = 
           </div>
         )}
 
+        {/* Book Details Modal */}
+        {selectedBook && (
+          <BookDetailsModal
+            book={selectedBook}
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            onSave={handleSaveBook}
+            isSaved={isBookSaved(selectedBook.title, selectedBook.author)}
+          />
+        )}
+
 
 
 
@@ -828,12 +752,21 @@ const BookRecommendations: React.FC<BookRecommendationsProps> = ({ hideHeader = 
                     {book.series_info && (
                       <div className="bg-accent-50 dark:bg-accent-900 px-3 py-2 rounded-lg text-xs text-accent-800 dark:text-accent-200">
                         <div className="flex items-center space-x-1">
-                          <span>�</span>
+                          <span>📚</span>
                           <span className="font-medium">Series:</span>
                           <span className="truncate">{book.series_info}</span>
                         </div>
                       </div>
                     )}
+
+                    {/* View Details Button */}
+                    <button
+                      onClick={() => handleOpenBookDetails(book)}
+                      className="mt-auto w-full py-2 px-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group"
+                    >
+                      <Eye className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                      <span>View Full Details</span>
+                    </button>
                   </div>
                 </div>
               ))}

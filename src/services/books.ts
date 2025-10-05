@@ -19,12 +19,15 @@ export interface Book {
   description: string;
   cover_image_url?: string;
   year_published?: number;
+  publisher?: string;
   rating?: number;
   language?: string;
   target_audience?: string;
   book_type?: string;
   content_type?: string;
   reading_level?: string;
+  // Aliases for compatibility with varying upstream fields
+  pages?: number;
   // Legacy fields for compatibility
   brief_summary?: string;
   short_description?: string;
