@@ -81,7 +81,7 @@ export const booksApi = {
 
     const request = {
       query: enhancedQuery,
-      max_recommendations: getCountFromRange(query.range || '10-20')
+      count: getCountFromRange(query.range || '10-20')
     };
     
     console.log('📤 Sending request to /books/recommendations:', request);
