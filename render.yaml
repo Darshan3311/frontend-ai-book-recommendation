@@ -1,12 +1,11 @@
 services:
   - type: web
     name: book-recommendations-frontend
-    env: static
+    env: node
     branch: main
     buildCommand: "npm install; npm run build"
     startCommand: "npm run start"
-    publishPath: "dist"
     plan: free
     envVars:
       - key: VITE_API_BASE_URL
-        value: "localhost:5000"
+        value: "https://api.example.com"

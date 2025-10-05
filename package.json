@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-  "build": "tsc && node ./node_modules/vite/bin/vite.js build",
+    "build": "tsc && node ./node_modules/vite/bin/vite.js build",
+    "start": "node ./node_modules/vite/bin/vite.js preview --host 0.0.0.0 --port $PORT",
     "render-build": "npm install && npm run build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
